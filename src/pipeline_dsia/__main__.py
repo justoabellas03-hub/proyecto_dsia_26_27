@@ -9,7 +9,7 @@ import sys
  
 from pipeline_dsia.constants import URL_API
 from pipeline_dsia.exceptions import DataLoadError, ValidationError
-from pipeline_dsia.loader import cargar_datos, cargar_fichero
+from pipeline_dsia.loader import cargar_datos
 from pipeline_dsia.validator import normalizar_numeros, validar_estaciones
  
 # Columnas del DataFrame general que usamos en el proyecto
@@ -24,35 +24,32 @@ COLUMNAS = [
  
  
 def main():
-    # 1. Cargar: desde fichero si se indica, si no desde la API
+    # 1. Cargar los datos de la API
     try:
-        if len(sys.argv) > 1:
-            df = cargar_fichero(sys.argv[1])
-        else:
-            df = cargar_datos(URL_API)
+        df = cargar_datos(URL_API)
     except DataLoadError as exc:
         print(f"Error al cargar los datos: {exc}")
         return 2
     print(f"Estaciones cargadas: {len(df)}")
- 
+
     # 2. Nuevo DataFrame solo con las columnas que nos interesan
     df_util = df[COLUMNAS].copy()
- 
+
     # 3. Coma decimal → punto
     df_normalizado = normalizar_numeros(df_util)
- 
-    # 4. Contrato de datos → DataFrame de válidas y de errores
+
+    # 4. Contrato de datos → DataFrame de estaciones válidas
     try:
-        df_validas, df_errores = validar_estaciones(df_normalizado)
+        df_validas, num_invalidas = validar_estaciones(df_normalizado)
     except ValidationError as exc:
         print(f"Validación fallida: {exc}")
         return 1
-    print(f"Válidas: {len(df_validas)} · Errores: {len(df_errores)}")
- 
+    print(f"Válidas: {len(df_validas)} · Inválidas: {num_invalidas}")
+
     # 5. Aquí empiezan las métricas
     print(df_validas.head())
     return 0
- 
- 
+
+
 if __name__ == "__main__":
     sys.exit(main())

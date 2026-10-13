@@ -18,7 +18,7 @@ PRECIOS = (
 
  
 # --- Rangos plausibles ---
-PRECIO_MIN, PRECIO_MAX = 0.5, 3.5          # €/litro
-LATITUD_MIN, LATITUD_MAX = 27.0, 44.5      # incluye Canarias
+PRECIO_MIN, PRECIO_MAX = 0.5, 3.5          # Intervalo de precio €/litro de los que considero que es imposible que los combustibles no pertenezca
+LATITUD_MIN, LATITUD_MAX = 27.0, 44.5      # Coordenadas que incluye Canarias
 LONGITUD_MIN, LONGITUD_MAX = -18.5, 4.5
  

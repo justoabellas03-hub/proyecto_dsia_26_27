@@ -32,8 +32,8 @@ def validar_estaciones(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
  
     for fila in df.to_dict(orient="records"):
         try:
-            estacion_valida=Estacion(fila)
-            validas.append(fila)
+            estacion_valida=Estacion(**fila)
+            validas.append(estacion_valida)
         except PydanticValidationError:
             num_invalidas += 1
  
