@@ -3,9 +3,7 @@ URL_API = (
     "PreciosCarburantes/EstacionesTerrestres/"
 )
  
-# --- Estructura de la respuesta de la API ---
-CLAVE_LISTA = "ListaEESSPrecio"
-CLAVE_FECHA = "Fecha"
+
  
 # --- Columnas que usamos (nombres tal y como vienen en la API) ---
 COORDENADAS = ("Latitud", "Longitud (WGS84)")
@@ -17,13 +15,7 @@ PRECIOS = (
     "Precio Gasoleo Premium",
 )
  
-COLUMNAS_UTILES = (
-    "IDEESS", "Rótulo", "Tipo Venta",
-    "Dirección", "C.P.", "Municipio", "Provincia",
-    "IDMunicipio", "IDProvincia", "IDCCAA",
-    *COORDENADAS,
-    *PRECIOS,
-)
+
  
 # --- Rangos plausibles ---
 PRECIO_MIN, PRECIO_MAX = 0.5, 3.5          # €/litro
