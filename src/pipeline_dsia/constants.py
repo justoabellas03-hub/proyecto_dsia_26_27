@@ -8,7 +8,7 @@ URL_API = (
 # --- Columnas que usamos (nombres tal y como vienen en la API) ---
 COORDENADAS = ("Latitud", "Longitud (WGS84)")
  
-PRECIOS = (
+CAMPOS_PRECIOS = (
     "Precio Gasolina 95 E5",
     "Precio Gasolina 98 E5",
     "Precio Gasoleo A",

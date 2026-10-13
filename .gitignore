@@ -1,10 +1,11 @@
- Ficheros generados por Python
+#Ficheros generados por Python
 __pycache__/
 *.py[oc]
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-inf
+data/
 
 # Entorno virtual
 .venv

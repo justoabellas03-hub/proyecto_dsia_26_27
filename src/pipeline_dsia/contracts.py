@@ -5,7 +5,9 @@ from pydantic import BaseModel, ConfigDict, field_validator, model_validator, Fi
 from pipeline_dsia.constants import (
     LATITUD_MAX, LATITUD_MIN, LONGITUD_MAX, LONGITUD_MIN, PRECIO_MAX, PRECIO_MIN,
 )
-CAMPOS_PRECIO=("gasolina_95", "gasolina_98", "gasoleo_a", "gasoleo_premium")
+
+CAMPOS_PRECIO = ("gasolina_95", "gasolina_98", "gasoleo_a", "gasoleo_premium")
+
 
 class Estacion(BaseModel):
 
@@ -44,7 +46,6 @@ class Estacion(BaseModel):
     @model_validator(mode="after")
     def vende_algun_carburante(self):
         """La estación debe vender al menos uno de los carburantes analizados."""
-        precios = (self.gasolina_95, self.gasolina_98, self.gasoleo_a, self.gasoleo_premium)
         if all(getattr(self, campo) is None for campo in CAMPOS_PRECIO):
             raise ValueError("no vende ninguno de los carburantes analizados")
         return self

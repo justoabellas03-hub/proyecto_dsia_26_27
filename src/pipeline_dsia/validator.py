@@ -1,15 +1,15 @@
 import pandas as pd
 from pydantic import ValidationError as PydanticValidationError
  
-from pipeline_dsia.constants import COORDENADAS, PRECIOS
-from pipeline_dsia.contracts import Estacion
+from pipeline_dsia.constants import CAMPOS_PRECIOS, COORDENADAS
+from pipeline_dsia.contracts import CAMPOS_PRECIO, Estacion
 from pipeline_dsia.exceptions import ValidationError
  
  
 def normalizar_numeros(df: pd.DataFrame) -> pd.DataFrame:
     #Devuelve una copia del df corrigiendo los valores numéricos cambiando el valor con una coma por el valor con un 
     resultado = df.copy()
-    for col in (*PRECIOS, *COORDENADAS):
+    for col in (*CAMPOS_PRECIOS, *COORDENADAS):
         resultado[col] = resultado[col].str.replace(",", ".", regex=False)
     return resultado
  
@@ -42,6 +42,8 @@ def validar_estaciones(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
  
     # Lista de objetos Estacion → lista de diccionarios → DataFrame
     df_validas = pd.DataFrame([estacion.model_dump() for estacion in validas])
+    # Si nadie vende un carburante, pandas dejaría la columna como texto (None); la forzamos a número
+    df_validas[list(CAMPOS_PRECIO)] = df_validas[list(CAMPOS_PRECIO)].astype(float)
  
     # Regla de conjunto (el contrato valida fila a fila y no puede verla)
     duplicadas = df_validas["id"].duplicated(keep="first")
