@@ -1,0 +1,18 @@
+[project]
+name = "pipeline-dsia"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Justo", email = "justoabellas03@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.4.0",
+    "pandas>=3.0.6",
+    "requests>=2.34.2",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.16,<0.13.0"]
+build-backend = "uv_build"
