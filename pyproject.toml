@@ -12,6 +12,8 @@ dependencies = [
     "pandas>=3.0.6",
     "pydantic>=2.14.1",
     "requests>=2.34.2",
+    "scikit-learn>=1.5",
+    "huggingface-hub>=0.28",
 ]
 
 [build-system]
@@ -20,7 +22,11 @@ build-backend = "uv_build"
 
 [tool.pytest.ini_options]
 testpaths = ["test"]
-pythonpath = ["src"]
+pythonpath = ["src", "test"]
+markers = [
+    "integration: tests de integración (histórico → entrenar → predecir), sin red",
+    "hf_real: llamada real a Hugging Face; necesita HF_TOKEN (pytest -m hf_real)",
+]
 
 [dependency-groups]
 dev = [

@@ -8,4 +8,11 @@ class DataLoadError(GasolinerasError):
  
 class ValidationError(GasolinerasError):
     """Los datos no superan la validación (p. ej. ninguna estación válida)."""
- 
+
+
+class ModelError(GasolinerasError):
+    """Problema con el modelo: no existe, no se puede cargar o no hay datos para entrenarlo."""
+
+
+class IAError(GasolinerasError):
+    """Ha fallado la llamada al proveedor de IA (Hugging Face)."""

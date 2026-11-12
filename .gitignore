@@ -7,6 +7,9 @@ wheels/
 *.egg-inf
 data/
 
+# Logs de ejecución (el histórico/ SÍ se sube: lo genera la ingesta diaria)
+logs/
+
 # Entorno virtual
 .venv
 

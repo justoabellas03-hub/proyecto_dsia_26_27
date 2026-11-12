@@ -1,0 +1,13 @@
+# Dependencias de ejecución (equivalente a [project.dependencies] de pyproject.toml).
+# El proyecto se gestiona con uv (uv sync); este fichero permite instalarlo también con pip:
+#   pip install -r requirements.txt
+pandas>=3.0.6
+pydantic>=2.14.1
+requests>=2.34.2
+scikit-learn>=1.5
+huggingface-hub>=0.28
+ipykernel>=7.4.0
+
+# Desarrollo
+pytest>=9.1.1
+pytest-cov>=7.1.0

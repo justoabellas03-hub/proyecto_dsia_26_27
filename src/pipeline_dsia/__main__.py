@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from pipeline_dsia.constants import URL_API
+from pipeline_dsia.constants import COLUMNAS, URL_API
 from pipeline_dsia.exceptions import DataLoadError, ValidationError
 from pipeline_dsia.loader import cargar_datos
 from pipeline_dsia.metrics import (
@@ -26,16 +26,6 @@ from pipeline_dsia.metrics import (
     precio_medio_por_provincia,
 )
 from pipeline_dsia.validator import normalizar_numeros, validar_estaciones
-
-# Columnas del DataFrame general que usamos en el proyecto
-COLUMNAS = [
-    "IDEESS", "Rótulo", "Tipo Venta",
-    "Dirección", "C.P.", "Municipio", "Provincia",
-    "IDMunicipio", "IDProvincia", "IDCCAA",
-    "Latitud", "Longitud (WGS84)",
-    "Precio Gasolina 95 E5", "Precio Gasolina 98 E5",
-    "Precio Gasoleo A", "Precio Gasoleo Premium",
-]
 
 # CSV donde se guardan las gasolineras válidas con sus métricas
 SALIDA_POR_DEFECTO = "data/gasolineras_metricas.csv"

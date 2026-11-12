@@ -1,0 +1,52 @@
+{
+  "fecha_entrenamiento": "2026-11-12T17:43:53",
+  "version_sklearn": "1.9.1",
+  "features": [
+    "carburante",
+    "id_provincia",
+    "tipo_venta",
+    "precio",
+    "dif_precio_1",
+    "dif_precio_3",
+    "dif_precio_7",
+    "dif_provincia",
+    "var_provincia_1",
+    "brent_eur",
+    "var_brent_3",
+    "var_brent_7",
+    "var_brent_14",
+    "dia_semana",
+    "latitud",
+    "longitud"
+  ],
+  "objetivo": "variacion_manana",
+  "hiperparametros": {
+    "learning_rate": 0.05,
+    "max_iter": 100,
+    "max_leaf_nodes": 15
+  },
+  "metricas_test": {
+    "persistencia": {
+      "mae_cts": 0.7836,
+      "rmse_cts": 1.8334,
+      "acierto_direccion": 0.0
+    },
+    "ridge": {
+      "mae_cts": 0.8683,
+      "rmse_cts": 1.7232,
+      "acierto_direccion": 84.6
+    },
+    "gradient_boosting": {
+      "mae_cts": 0.8404,
+      "rmse_cts": 1.7478,
+      "acierto_direccion": 83.0
+    }
+  },
+  "train_desde": "2026-10-08",
+  "train_hasta": "2026-11-04",
+  "test_desde": "2026-11-05",
+  "test_hasta": "2026-11-11",
+  "filas_train": 936287,
+  "filas_test": 234671,
+  "fecha_informe": "2026-11-12 17:43"
+}
