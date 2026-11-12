@@ -1,0 +1,81 @@
+name: Pipeline diario
+
+# Cada día: ingesta → (los lunes, reentrenar) → predicción de mañana.
+# Sustituye a ingesta_diaria.yml (si lo tenías, bórralo para no ejecutar la ingesta dos veces).
+
+on:
+  schedule:
+    - cron: "17 6 * * *"     # todos los días a las 06:17 UTC (07:17 en Madrid en invierno)
+  workflow_dispatch:          # botón "Run workflow" en la pestaña Actions
+    inputs:
+      desde:
+        description: "Backfill desde (AAAA-MM-DD). Vacío = solo hoy"
+        required: false
+      reentrenar:
+        description: "Reentrenar el modelo en esta ejecución"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write             # para poder hacer commit del histórico y del modelo
+
+concurrency:
+  group: pipeline-diario      # nunca dos ejecuciones a la vez escribiendo el histórico
+  cancel-in-progress: false
+
+env:
+  AI_PROVIDER: hf                          # si no existe el secreto HF_TOKEN, el código usa el mock
+  HF_TOKEN: ${{ secrets.HF_TOKEN }}
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Instalar dependencias
+        run: uv sync
+
+      - name: Ingesta
+        run: |
+          if [ -n "${{ github.event.inputs.desde }}" ]; then
+            uv run python -m pipeline_dsia.ingesta --desde "${{ github.event.inputs.desde }}"
+          fi
+          uv run python -m pipeline_dsia.ingesta
+
+      - name: Entrenar (los lunes, a mano o si aún no hay modelo)
+        run: |
+          if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event.inputs.reentrenar }}" = "true" ] || [ ! -f models/modelo.joblib ]; then
+            uv run python -m pipeline_dsia.entrenar
+          else
+            echo "Hoy no toca reentrenar"
+          fi
+
+      - name: Predecir mañana
+        run: uv run python -m pipeline_dsia.predecir
+
+      - name: Publicar la predicción como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: prediccion-${{ github.run_id }}
+          path: |
+            data/predicciones.csv
+            data/informe_prediccion.md
+            logs/
+          if-no-files-found: warn
+
+      - name: Guardar el histórico y el modelo en el repositorio
+        if: always()          # aunque falle un paso, guarda lo que se haya descargado
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add historico/
+          [ -d models ] && git add models/
+          git diff --cached --quiet && echo "Sin cambios" && exit 0
+          git commit -m "datos: pipeline diario $(date -u +%F)"
+          git pull --rebase
+          git push
