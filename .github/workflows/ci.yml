@@ -1,0 +1,49 @@
+name: CI
+
+# CI común del repositorio: tests de la parte A (ventas) y de la parte B (carburantes).
+# El pipeline diario de datos va aparte, en pipeline_diario.yml.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  parte-a-ventas:
+    name: Parte A · ejercicio_ventas
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: parte_a/ejercicio_ventas
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Instalar dependencias
+        run: uv sync
+
+      - name: Tests con cobertura (mínimo 80 %)
+        run: uv run pytest --cov=ejercicio_ventas --cov-report=term-missing --cov-fail-under=80
+
+      - name: Ejecutar el pipeline
+        run: uv run python -m ejercicio_ventas --salida "$RUNNER_TEMP/ventas"
+
+  parte-b-carburantes:
+    name: Parte B · pipeline_dsia
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Instalar dependencias
+        run: uv sync
+
+      - name: Tests con cobertura (sin llamadas reales a Hugging Face)
+        env:
+          AI_PROVIDER: mock
+        run: uv run pytest -m "not hf_real" --cov=pipeline_dsia --cov-report=term-missing
