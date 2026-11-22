@@ -1,0 +1,27 @@
+[project]
+name = "ejercicio-ventas"
+version = "0.1.0"
+description = "Ejercicio E1 de DSIA: pipeline de calidad de datos de ventas"
+readme = "README.md"
+authors = [
+    { name = "Justo", email = "justoabellas03@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.4.0",
+    "pandas>=3.0.6",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.16,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src", "tests"]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]

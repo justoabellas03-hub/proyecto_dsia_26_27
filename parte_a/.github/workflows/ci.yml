@@ -1,0 +1,27 @@
+name: CI ejercicio ventas
+ 
+on:
+  push:
+    branches: [main]
+  pull_request:
+ 
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ejercicio_ventas
+    steps:
+      - uses: actions/checkout@v4
+ 
+      - name: Instalar uv
+        uses: astral-sh/setup-uv@v6
+ 
+      - name: Instalar dependencias
+        run: uv sync
+ 
+      - name: Tests con cobertura (mínimo 60 %)
+        run: uv run pytest --cov=ejercicio_ventas --cov-report=term-missing --cov-fail-under=60
+ 
+      - name: Ejecutar el pipeline
+        run: uv run python -m ejercicio_ventas
