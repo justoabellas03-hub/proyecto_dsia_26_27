@@ -1,5 +1,5 @@
 {
-  "fecha_entrenamiento": "2026-11-12T17:43:53",
+  "fecha_entrenamiento": "2026-11-12T19:14:00",
   "version_sklearn": "1.9.1",
   "features": [
     "carburante",
@@ -11,6 +11,7 @@
     "dif_precio_7",
     "dif_provincia",
     "var_provincia_1",
+    "var_nacional_1",
     "brent_eur",
     "var_brent_3",
     "var_brent_7",
@@ -27,26 +28,26 @@
   },
   "metricas_test": {
     "persistencia": {
-      "mae_cts": 0.7836,
-      "rmse_cts": 1.8334,
+      "mae_cts": 0.5419,
+      "rmse_cts": 1.3244,
       "acierto_direccion": 0.0
     },
     "ridge": {
-      "mae_cts": 0.8683,
-      "rmse_cts": 1.7232,
-      "acierto_direccion": 84.6
+      "mae_cts": 1.0826,
+      "rmse_cts": 1.453,
+      "acierto_direccion": 71.4
     },
     "gradient_boosting": {
-      "mae_cts": 0.8404,
-      "rmse_cts": 1.7478,
-      "acierto_direccion": 83.0
+      "mae_cts": 0.8611,
+      "rmse_cts": 1.4389,
+      "acierto_direccion": 74.3
     }
   },
-  "train_desde": "2026-10-08",
-  "train_hasta": "2026-11-04",
-  "test_desde": "2026-11-05",
+  "train_desde": "2026-06-08",
+  "train_hasta": "2026-10-11",
+  "test_desde": "2026-10-12",
   "test_hasta": "2026-11-11",
-  "filas_train": 936287,
-  "filas_test": 234671,
-  "fecha_informe": "2026-11-12 17:43"
+  "filas_train": 4228603,
+  "filas_test": 1036363,
+  "fecha_informe": "2026-11-12 19:14"
 }
