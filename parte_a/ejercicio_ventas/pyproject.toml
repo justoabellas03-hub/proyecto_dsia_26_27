@@ -12,6 +12,9 @@ dependencies = [
     "pandas>=3.0.6",
 ]
 
+[project.scripts]
+ejercicio-ventas = "ejercicio_ventas.cli:main"
+
 [build-system]
 requires = ["uv_build>=0.12.16,<0.13.0"]
 build-backend = "uv_build"
@@ -19,6 +22,9 @@ build-backend = "uv_build"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src", "tests"]
+markers = [
+    "integration: pipeline completo con el CSV real del curso",
+]
 
 [dependency-groups]
 dev = [

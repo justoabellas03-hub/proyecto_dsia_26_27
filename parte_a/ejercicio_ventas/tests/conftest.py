@@ -34,7 +34,15 @@ def ventas_mini() -> pd.DataFrame:
 @pytest.fixture
 def ventas_validas(ventas_mini) -> pd.DataFrame:
     """Las cuatro ventas válidas de ventas_mini, ya validadas."""
-    from ejercicio_ventas.funciones import Validar_ventas
+    from ejercicio_ventas.validator import validar_ventas
 
-    df_validos, _ = Validar_ventas(ventas_mini)
+    df_validos, _ = validar_ventas(ventas_mini)
     return df_validos
+
+
+@pytest.fixture
+def csv_mini(tmp_path, ventas_mini) -> Path:
+    """ventas_mini guardado como CSV en una carpeta temporal."""
+    ruta = tmp_path / "ventas.csv"
+    ventas_mini.to_csv(ruta, index=False)
+    return ruta
