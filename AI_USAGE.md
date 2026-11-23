@@ -1,66 +1,74 @@
 # Uso de IA en el proyecto
 
-Este documento recoge dos cosas distintas: la IA que **forma parte del producto** (el modelo de
-Hugging Face que usa el pipeline) y la IA usada **como ayuda para desarrollar** el código.
+Aquí cuento qué parte del proyecto es mía y en qué me ha ayudado la inteligencia artificial.
+Son dos cosas distintas: la IA que forma parte del programa (Hugging Face) y la IA que he usado
+como ayuda para programarlo (Claude).
 
-## 1. IA dentro del pipeline
+## 1. La IA dentro del programa
 
-| | |
-| --- | --- |
-| **Proveedor** | Hugging Face (Inference API, librería `huggingface_hub`, clase `InferenceClient`) |
-| **Tarea** | `chat_completion` (generación de texto con un LLM) |
-| **Modelo del Hub** | `meta-llama/Llama-3.1-8B-Instruct` (configurable con la variable `HF_MODEL`) |
-| **Para qué** | Redactar en lenguaje natural la previsión que calcula el modelo scikit-learn |
-| **Dónde** | `src/pipeline_dsia/ia.py` (cliente) y paso 4 de `src/pipeline_dsia/predecir.py` |
-| **Credenciales** | `HF_TOKEN` en `.env` (local) o como secreto de GitHub Actions. Nunca en Git |
+El programa usa un modelo de lenguaje de Hugging Face para contar con palabras la predicción del
+día siguiente. Las cifras las calcula siempre mi modelo de scikit-learn: el modelo de lenguaje
+solo redacta un resumen que ya está calculado, y tiene prohibido inventarse datos o causas. En el
+informe final van también las cifras originales, para poder comprobar que el texto dice la verdad.
 
-**Qué hace y qué no hace el LLM.** Las cifras las calcula siempre scikit-learn. El LLM recibe un
-resumen ya calculado (precio medio, variación media prevista, % de estaciones que suben o bajan,
-variación del Brent) y solo lo redacta. Las instrucciones le prohíben inventar datos o causas, y
-el informe final incluye la tabla con las cifras originales para poder contrastar el texto.
+- **Proveedor:** Hugging Face (Inference Providers), con `InferenceClient` de la librería `huggingface_hub`.
+- **Tarea:** `chat_completion` (generar texto con un modelo de lenguaje).
+- **Modelo:** `meta-llama/Llama-3.1-8B-Instruct` (se puede cambiar con la variable `HF_MODEL`).
+- **Dónde está:** `src/pipeline_dsia/ia.py`; se llama desde `predecir.py`.
+- **Token:** `HF_TOKEN` en el fichero `.env` (en local) o como secreto en GitHub. Nunca se sube a Git.
 
-**Modo mock.** `AI_PROVIDER=mock` (valor por defecto) usa `ClienteMock`, que genera el texto con
-una plantilla fija: sin red, sin token y con resultado reproducible. **Los tests y la CI usan
-siempre el mock.** Además, si Hugging Face falla (red, token, modelo no disponible), el pipeline
-no se detiene: registra el error y usa el mock como respaldo.
+Por defecto (`AI_PROVIDER=mock`) se usa un **mock**: escribe el texto con una plantilla, sin red y
+siempre igual. Los tests y el CI usan siempre el mock. Si Hugging Face falla (sin red, token mal,
+modelo no disponible), el programa no se para: apunta el error en el log y tira del mock.
+La llamada real se prueba con `uv run pytest -m hf_real` (si no hay token, ese test se salta).
 
-**Test con el proveedor real.** `uv run pytest -m hf_real` hace una llamada real; se salta solo si
-no hay `HF_TOKEN`.
+## 2. Qué es mío y en qué me ha ayudado la IA
 
-## 2. IA como ayuda al desarrollo
+Como asistente de programación he usado **Claude** (Anthropic), sobre todo en noviembre de 2026.
 
-| | |
-| --- | --- |
-| **Herramienta** | Claude (Anthropic), en modo asistente de programación |
-| **Fechas** | Noviembre de 2026 |
+### Lo que es cosecha mía
 
-**Qué generó la IA (y acepté tras revisarlo):**
+- **La obtención de los datos.** Elegí el tema y las fuentes: los precios de las gasolineras que
+  publica el Ministerio y, como variables de mercado, el Brent (FRED) y el cambio euro-dólar (BCE).
+- **La validación de los datos.** Las reglas que tiene que cumplir cada estación: precios entre
+  0,5 y 3,5 €/l, coordenadas dentro de España (Canarias incluida), código postal de 5 cifras,
+  que venda al menos uno de los carburantes que analizo y que no haya estaciones repetidas.
+- **Las métricas diarias.** El precio medio por provincia y por marca, la comparación de cada
+  estación con la media de su provincia, las gasolineras más baratas de España y la diferencia
+  entre gasolina y gasóleo.
+- **El método y el modelo.** Predecir cuánto va a cambiar el precio de cada estación al día
+  siguiente; compararlo con la persistencia (suponer que el precio no cambia) y con una regresión
+  Ridge; y usar un gradient boosting con sus hiperparámetros (`learning_rate`, `max_leaf_nodes` y
+  `max_iter`), elegidos con validación cruzada temporal para no usar datos del futuro.
 
-- El código de la segunda parte: descargas de mercados (`loader.py`), histórico e ingesta
-  (`historico.py`), features, modelo y entrenamiento (`modelo.py`), predicción y consulta
-  (`predecir.py`), cliente de IA (`ia.py`), configuración y logs (`config.py`).
-- La reorganización del paquete de 19 a 10 módulos, con una sola línea de comandos
-  (`python -m pipeline_dsia <comando>`), sin cambiar la lógica: los mismos tests siguen pasando.
-- Los tests de esos módulos y el generador de datos sintéticos de `test/conftest.py`.
-- El workflow de GitHub Actions `pipeline_diario.yml`.
-- Borradores de la documentación (README, `docs/DEFENSA.md` y este fichero).
+### Lo que tiene mucho de IA
 
-**Qué decidí yo:**
+En estas partes la IA me ha ayudado mucho, tanto explicándome cosas que no conocía como
+escribiendo buena parte del código:
 
-- El dominio y los datos (precios de carburantes del Ministerio), el contrato de datos y las
-  métricas de la primera parte.
-- La idea de la segunda parte: añadir variables de mercado (Brent, EUR/USD) y predecir el precio
-  del día siguiente con ingesta diaria programada.
-- <!-- COMPLETAR: decisiones que hayas cambiado o ajustado tú al revisar el código -->
+- **La estrategia del flujo y el pipeline.** Cómo encadenar los pasos (ingesta → histórico →
+  entrenar → predecir), cómo repartir el código en módulos (primero eran 19 ficheros y luego
+  los dejamos en 10, con un solo comando `python -m pipeline_dsia`) y el comando `todo`, que lo
+  ejecuta todo seguido.
+- **Hugging Face.** No lo había usado nunca. La IA me explicó cómo funciona la Inference API y
+  me ayudó a montar el cliente, el mock y el respaldo para cuando falla.
+- **Los logs.** Cómo configurarlos para que salgan por pantalla y queden guardados en `logs/`.
+- **La programación de tareas.** El workflow de GitHub Actions y, cuando vimos que desde GitHub
+  fallaba la descarga de los datos de mercado, el script para el Programador de tareas de Windows.
+- **La actualización de la base de datos.** El histórico con un fichero por día, el backfill
+  para rellenar los días que faltan y cómo subir los datos nuevos al repositorio.
+- **Otras ayudas.** Los tests (sobre todo los del validador, los de integración y los de la parte A),
+  la reorganización de la parte A en módulos, el CI común para las dos partes y los borradores
+  del README y de `docs/DEFENSA.md`.
 
-**Qué revisé y cómo lo comprobé:**
+### Cómo lo he revisado
 
-- Ejecuté los tests (`uv run pytest`) y el pipeline completo con datos reales
-  (ingesta → entrenar → predecir).
-- Revisé `models/INFORME_MODELO.md` para comprobar que las métricas tienen sentido frente a la
+No he dado nada por bueno sin probarlo:
+
+- Paso los tests (`uv run pytest`) y he ejecutado el programa entero con datos reales.
+- Miro `models/INFORME_MODELO.md` para comprobar que el modelo tiene sentido comparado con la
   persistencia.
-- <!-- COMPLETAR: cualquier error que encontraras y cómo lo corregiste -->
-
-**Qué no acepté o modifiqué:**
-
-- <!-- COMPLETAR: si cambiaste algo de lo que propuso la IA, anótalo aquí. Si no, borra este apartado -->
+- Me he peleado con problemas reales que no salen en ningún tutorial: la API del Ministerio me
+  cortaba la conexión desde Python y a veces solo funcionaba con curl; el primer backfill desde
+  agosto falló entero y tuve que ir cargando los datos por tramos; y la descarga del Brent desde
+  FRED a veces se queda colgada, que es lo que hacía fallar cada día el workflow de GitHub.
