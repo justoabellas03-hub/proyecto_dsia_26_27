@@ -4,8 +4,8 @@ name: Pipeline diario
 # Sustituye a ingesta_diaria.yml (si lo tenías, bórralo para no ejecutar la ingesta dos veces).
 
 # La ejecución diaria se hace en local con el Programador de tareas de Windows
-# (scripts/pipeline_local.ps1), porque la API del Ministerio rechaza las conexiones
-# desde los servidores de GitHub. Este workflow queda para lanzarlo a mano.
+# (scripts/pipeline_local.ps1), porque aquí fallaba la descarga de los datos de mercado
+# (Brent y EUR/USD) y con ella todo el workflow. Este workflow queda para lanzarlo a mano.
 on:
   workflow_dispatch:          # botón "Run workflow" en la pestaña Actions
     inputs:
@@ -41,9 +41,8 @@ jobs:
       - name: Instalar dependencias
         run: uv sync
 
-      # El servidor del Ministerio suele rechazar conexiones desde servidores en la nube
-      # (como los de GitHub). Si la descarga falla, el pipeline sigue con el histórico
-      # que ya hay en el repo y la ejecución queda marcada con un aviso, no como fallida.
+      # Si alguna descarga falla (en GitHub fallaban los datos de mercado), el pipeline sigue
+      # con el histórico que ya hay en el repo y la ejecución queda marcada con un aviso.
       - name: Ingesta
         id: ingesta
         continue-on-error: true
@@ -55,7 +54,7 @@ jobs:
 
       - name: Avisar si la ingesta ha fallado
         if: steps.ingesta.outcome == 'failure'
-        run: echo "::warning title=Ingesta::No se han podido descargar los datos de hoy (la API del Ministerio no responde desde GitHub). Se predice con el último histórico disponible."
+        run: echo "::warning title=Ingesta::No se han podido descargar los datos de hoy (revisa el log del paso Ingesta). Se predice con el último histórico disponible."
 
       - name: Entrenar (los lunes, a mano o si aún no hay modelo)
         run: |

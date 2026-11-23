@@ -412,5 +412,8 @@ uv run python -m pipeline_dsia predecir         # 4. predicción + explicación 
 uv run python -m pipeline_dsia consultar --provincia madrid --carburante gasoleo_a   # 5. consulta concreta
 ```
 
+Los pasos 2 a 4 (más las métricas del Proyecto I) también se lanzan de una vez con
+`uv run python -m pipeline_dsia`; por separado se ve mejor qué hace cada uno.
+
 Después, enseñar en GitHub la pestaña **Actions** con las ejecuciones diarias y los commits
 automáticos de `historico/`.

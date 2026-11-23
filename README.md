@@ -55,7 +55,15 @@ uv sync
 
 ## Uso
 
-El flujo completo son tres comandos, en este orden:
+Todo el flujo se lanza con un solo comando:
+
+```bash
+uv run python -m pipeline_dsia                 # ingesta → entrenar (los lunes) → predecir → métricas
+uv run python -m pipeline_dsia todo --reentrenar   # lo mismo, reentrenando aunque no sea lunes
+```
+
+Si un paso falla, sigue con el siguiente (sin ingesta predice con el último histórico) y al final
+muestra un resumen de cada paso. También se puede lanzar cada paso por separado, en este orden:
 
 ```bash
 uv run python -m pipeline_dsia ingesta --desde 2026-08-01   # 1. (solo la primera vez) rellenar el histórico
@@ -67,6 +75,7 @@ uv run python -m pipeline_dsia consultar --provincia sevilla --carburante gasole
 
 | Comando | Qué hace | Genera |
 | --- | --- | --- |
+| `todo` (o sin comando) | Ingesta, entrenar (los lunes o con `--reentrenar`), predecir y métricas | Todo lo de abajo |
 | `ingesta` | Descarga precios, Brent y EUR/USD y los valida | `historico/` |
 | `entrenar` | Busca hiperparámetros, evalúa y guarda el modelo | `models/modelo.joblib`, `models/metricas.json`, `models/INFORME_MODELO.md` |
 | `predecir` | Aplica el modelo al último día y explica el resultado | `data/predicciones.csv`, `data/informe_prediccion.md` |
@@ -188,11 +197,12 @@ falla, el pipeline sigue con el mock.
 
 ## Automatización
 
-**Ejecución diaria (local).** La API del Ministerio rechaza las conexiones desde servidores en
-la nube, incluidos los de GitHub Actions (el paso de ingesta terminaba con código 2). Por eso el
-pipeline diario se ejecuta en local con el Programador de tareas de Windows:
-`scripts/pipeline_local.ps1` hace ingesta → (los lunes, entrenar) → predecir, guarda `historico/`
-y `models/` con un commit y hace push. El registro queda en `logs/pipeline_local.log`.
+**Ejecución diaria (local).** En GitHub Actions el paso de ingesta terminaba con código 2: los
+precios del Ministerio se guardaban, pero fallaba la descarga de los datos de mercado (Brent y
+EUR/USD), y con ella todo el workflow. Por eso el pipeline diario se ejecuta en local con el
+Programador de tareas de Windows: `scripts/pipeline_local.ps1` lanza `python -m pipeline_dsia todo`
+(ingesta → entrenar los lunes → predecir → métricas), guarda `historico/` y `models/` con un commit
+y hace push. El registro queda en `logs/pipeline_local.log`.
 
 Para registrar la tarea (PowerShell, una sola vez):
 

@@ -1,6 +1,8 @@
 """Línea de comandos del pipeline de precios de carburantes.
 
 Uso:
+    python -m pipeline_dsia                             # todo el flujo: ingesta → entrenar → predecir → métricas
+    python -m pipeline_dsia todo --reentrenar           # lo mismo, reentrenando aunque no sea lunes
     python -m pipeline_dsia metricas                    # Proyecto I: API → contrato → métricas del día → CSV
     python -m pipeline_dsia metricas --top 5 --min-estaciones 30
     python -m pipeline_dsia ingesta                     # precios de hoy + Brent + EUR/USD → historico/
@@ -103,6 +105,35 @@ def ejecutar_metricas(top: int = 10, min_estaciones: int = 20, salida: str = SAL
     return 0
 
 
+# --- Flujo completo ------------------------------------------------------------------------
+
+def toca_reentrenar(reentrenar: bool = False, hoy: date | None = None) -> bool:
+    """Se reentrena si se pide, los lunes o si todavía no hay modelo guardado."""
+    hoy = hoy or date.today()
+    return reentrenar or hoy.weekday() == 0 or not (CARPETA_MODELOS / "modelo.joblib").exists()
+
+
+def ejecutar_todo(reentrenar: bool = False) -> int:
+    """Ingesta → (los lunes) entrenar → predecir → métricas, con las opciones por defecto.
+
+    Si un paso falla, se sigue con el siguiente: sin ingesta se predice con el último
+    histórico y, si el entrenamiento falla, con el último modelo guardado.
+    Devuelve 0 si todo ha ido bien o el código del primer paso que ha fallado.
+    """
+    codigos = {"ingesta": ejecutar_ingesta()}
+    if toca_reentrenar(reentrenar):
+        codigos["entrenar"] = ejecutar_entrenamiento()
+    else:
+        print("Hoy no toca reentrenar (se hace los lunes; usa --reentrenar para forzarlo)")
+    codigos["predecir"] = ejecutar_prediccion()
+    codigos["metricas"] = ejecutar_metricas()
+
+    print("\n=== Resumen ===")
+    for paso, codigo in codigos.items():
+        print(f"{paso:9s} {'correcto' if codigo == 0 else f'falló (código {codigo})'}")
+    return next((codigo for codigo in codigos.values() if codigo), 0)
+
+
 # --- Tipos para argparse ---------------------------------------------------------------
 
 def entero_positivo(valor: str) -> int:
@@ -143,7 +174,13 @@ def crear_parser() -> argparse.ArgumentParser:
         prog="python -m pipeline_dsia",
         description="Pipeline de precios de carburantes en España: métricas, histórico, modelo y predicción.",
     )
-    comandos = parser.add_subparsers(dest="comando", required=True, metavar="comando")
+    comandos = parser.add_subparsers(dest="comando", metavar="comando")
+
+    todo = comandos.add_parser(
+        "todo", help="todo el flujo: ingesta → entrenar (los lunes) → predecir → métricas (por defecto)",
+        description="Ejecuta todo el pipeline con las opciones por defecto. Es lo que se lanza sin comando.",
+    )
+    todo.add_argument("--reentrenar", action="store_true", help="reentrenar el modelo aunque no sea lunes")
 
     metricas = comandos.add_parser(
         "metricas", help="métricas descriptivas de hoy (Proyecto I)",
@@ -205,6 +242,8 @@ def crear_parser() -> argparse.ArgumentParser:
 
 def main(argv=None) -> int:
     args = crear_parser().parse_args(argv)
+    if args.comando in (None, "todo"):
+        return ejecutar_todo(getattr(args, "reentrenar", False))
     if args.comando == "metricas":
         return ejecutar_metricas(args.top, args.min_estaciones, args.salida)
     if args.comando == "ingesta":
