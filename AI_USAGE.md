@@ -36,8 +36,11 @@ no hay `HF_TOKEN`.
 
 **Qué generó la IA (y acepté tras revisarlo):**
 
-- Módulos de la segunda parte: `mercados.py`, `historico.py`, `ingesta.py`, `features.py`,
-  `modelo.py`, `entrenar.py`, `predecir.py`, `ia.py`, `config.py`, `registro.py`.
+- El código de la segunda parte: descargas de mercados (`loader.py`), histórico e ingesta
+  (`historico.py`), features, modelo y entrenamiento (`modelo.py`), predicción y consulta
+  (`predecir.py`), cliente de IA (`ia.py`), configuración y logs (`config.py`).
+- La reorganización del paquete de 19 a 10 módulos, con una sola línea de comandos
+  (`python -m pipeline_dsia <comando>`), sin cambiar la lógica: los mismos tests siguen pasando.
 - Los tests de esos módulos y el generador de datos sintéticos de `test/conftest.py`.
 - El workflow de GitHub Actions `pipeline_diario.yml`.
 - Borradores de la documentación (README, `docs/DEFENSA.md` y este fichero).

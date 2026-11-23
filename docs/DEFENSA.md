@@ -17,7 +17,7 @@ Las dos piezas que pide el enunciado:
 
 | Pieza | En este proyecto | Fichero |
 | --- | --- | --- |
-| Modelo scikit-learn entrenado por mí | Regresión: variación del precio al día siguiente | `modelo.py`, `entrenar.py`, `predecir.py` |
+| Modelo scikit-learn entrenado por mí | Regresión: variación del precio al día siguiente | `modelo.py`, `predecir.py` |
 | Modelo del Hub de Hugging Face vía API | Tarea `chat_completion`: redactar la previsión | `ia.py` |
 
 ## 2. Flujo completo
@@ -27,11 +27,11 @@ Las dos piezas que pide el enunciado:
                  │                     │                 │
                  └──────────┬──────────┴─────────────────┘
                             ▼
-   ingesta.py   →  contrato pydantic  →  historico/ (un fichero por día)
+   historico.py →  contrato pydantic  →  historico/ (un fichero por día)
                             ▼
-   features.py  →  una fila por estación × carburante × día, con sus variables
+   modelo.py    →  una fila por estación × carburante × día, con sus variables
                             ▼
-   entrenar.py  →  búsqueda de hiperparámetros → evaluación → models/modelo.joblib
+   modelo.py    →  búsqueda de hiperparámetros → evaluación → models/modelo.joblib
                             ▼                                 models/INFORME_MODELO.md
    predecir.py  →  data/predicciones.csv  (precio previsto para mañana)
                             ▼
@@ -73,7 +73,7 @@ El precio previsto se obtiene al final: `precio_previsto = precio_hoy + variaci�
 
 ## 5. Las variables (features)
 
-Están todas en `features.py`. La idea general: el precio de una estación mañana depende de
+Están todas en `modelo.py` (sección 1, features). La idea general: el precio de una estación mañana depende de
 (a) su propia inercia, (b) lo que hacen las estaciones de su zona y (c) el coste del petróleo.
 
 | Variable | Qué es | Por qué ayuda |
@@ -302,12 +302,11 @@ predicción será −0,8 céntimos, un valor que en la realidad no ocurrirá. Po
 
 | Fichero | Qué comprueba |
 | --- | --- |
-| `test_features.py` | Objetivo y retardos calculados a mano; huecos de días; que el Brent no usa el futuro |
-| `test_modelo.py` | Separación y particiones temporales; métricas; **guardar → cargar → predecir**; categorías nuevas y valores vacíos |
+| `test_modelo.py` | Features: objetivo y retardos calculados a mano, huecos de días, que el Brent no usa el futuro. Modelo: separación y particiones temporales; métricas; **guardar → cargar → predecir**; categorías nuevas y valores vacíos |
 | `test_ia.py` | Contratos; mock determinista; cliente HF con un cliente falso inyectado; respaldo al mock |
-| `test_pipeline_modelo.py` | **Integración** (`@pytest.mark.integration`): histórico → entrenar → predecir → informe, y los códigos de salida |
-| `test_mercados.py`, `test_historico.py`, `test_ingesta.py`, `test_loader.py` | Ingesta, reintentos e histórico |
-| `test_metrics.py`, `test_cli.py` | Primera parte |
+| `test_integration.py` | **Integración** (`@pytest.mark.integration`): histórico → entrenar → predecir → informe, y los códigos de salida |
+| `test_loader.py`, `test_historico.py` | Descargas con reintentos, mercados, ingesta e histórico |
+| `test_validator.py`, `test_metrics.py`, `test_cli.py`, `test_predecir.py` | Primera parte, línea de comandos y consulta |
 
 - Los tests del modelo usan un **histórico sintético** (`crear_historico_sintetico` en
   `conftest.py`): precios inventados que siguen al Brent con retraso. Como ahí la señal existe por
@@ -355,13 +354,13 @@ predicción será −0,8 céntimos, un valor que en la realidad no ocurrirá. Po
 | Ya está (Proyecto II) | Se añadirá (Proyecto III) |
 | --- | --- |
 | `predecir_manana()` como función independiente | Endpoint `/predict` de una API (FastAPI) |
-| `consultar.py`: filtros por estación, municipio, provincia, marca y carburante | Los mismos filtros como parámetros de `/predict` |
+| `ejecutar_consulta()` (`predecir.py`): filtros por estación, municipio, provincia, marca y carburante | Los mismos filtros como parámetros de `/predict` |
 | `ClienteIA.explicar()` con contratos pydantic | Endpoint `/analyze` |
 | Predicción diaria guardada | **Monitorización**: comparar la predicción de ayer con el precio real de hoy y vigilar si el error crece |
 | Reentrenamiento semanal en Actions | Reentrenar cuando el error supere un umbral |
 | CLI y workflows | Despliegue |
 
-El núcleo (`features.py`, `modelo.py`, `ia.py`) no depende de la línea de comandos: una API puede
+El núcleo (`modelo.py`, `predecir.py`, `ia.py`) no depende de la línea de comandos: una API puede
 llamar a las mismas funciones sin reescribir nada.
 
 ## 16. Preguntas probables y respuesta corta
@@ -407,10 +406,10 @@ Está en `AI_USAGE.md`.
 
 ```bash
 uv run pytest                                   # 1. todo pasa, sin red
-uv run python -m pipeline_dsia.ingesta          # 2. descarga de hoy → historico/
-uv run python -m pipeline_dsia.entrenar         # 3. búsqueda + métricas (enseñar models/INFORME_MODELO.md)
-uv run python -m pipeline_dsia.predecir         # 4. predicción + explicación (enseñar data/informe_prediccion.md)
-uv run python -m pipeline_dsia.consultar --provincia madrid --carburante gasoleo_a   # 5. consulta concreta
+uv run python -m pipeline_dsia ingesta          # 2. descarga de hoy → historico/
+uv run python -m pipeline_dsia entrenar         # 3. búsqueda + métricas (enseñar models/INFORME_MODELO.md)
+uv run python -m pipeline_dsia predecir         # 4. predicción + explicación (enseñar data/informe_prediccion.md)
+uv run python -m pipeline_dsia consultar --provincia madrid --carburante gasoleo_a   # 5. consulta concreta
 ```
 
 Después, enseñar en GitHub la pestaña **Actions** con las ejecuciones diarias y los commits

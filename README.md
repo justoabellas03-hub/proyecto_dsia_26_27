@@ -58,30 +58,30 @@ uv sync
 El flujo completo son tres comandos, en este orden:
 
 ```bash
-uv run python -m pipeline_dsia.ingesta --desde 2026-08-01   # 1. (solo la primera vez) rellenar el histórico
-uv run python -m pipeline_dsia.ingesta                      # 1. datos de hoy
-uv run python -m pipeline_dsia.entrenar                     # 2. entrenar el modelo sklearn
-uv run python -m pipeline_dsia.predecir                     # 3. predecir mañana + explicación
-uv run python -m pipeline_dsia.consultar --provincia sevilla --carburante gasoleo_a   # 4. consultar
+uv run python -m pipeline_dsia ingesta --desde 2026-08-01   # 1. (solo la primera vez) rellenar el histórico
+uv run python -m pipeline_dsia ingesta                      # 1. datos de hoy
+uv run python -m pipeline_dsia entrenar                     # 2. entrenar el modelo sklearn
+uv run python -m pipeline_dsia predecir                     # 3. predecir mañana + explicación
+uv run python -m pipeline_dsia consultar --provincia sevilla --carburante gasoleo_a   # 4. consultar
 ```
 
 | Comando | Qué hace | Genera |
 | --- | --- | --- |
-| `pipeline_dsia.ingesta` | Descarga precios, Brent y EUR/USD y los valida | `historico/` |
-| `pipeline_dsia.entrenar` | Busca hiperparámetros, evalúa y guarda el modelo | `models/modelo.joblib`, `models/metricas.json`, `models/INFORME_MODELO.md` |
-| `pipeline_dsia.predecir` | Aplica el modelo al último día y explica el resultado | `data/predicciones.csv`, `data/informe_prediccion.md` |
-| `pipeline_dsia.consultar` | Muestra el precio previsto por estación, municipio, provincia, marca o carburante | (por pantalla) |
-| `pipeline_dsia` | Métricas descriptivas del día (Proyecto I) | `data/gasolineras_metricas.csv` |
+| `ingesta` | Descarga precios, Brent y EUR/USD y los valida | `historico/` |
+| `entrenar` | Busca hiperparámetros, evalúa y guarda el modelo | `models/modelo.joblib`, `models/metricas.json`, `models/INFORME_MODELO.md` |
+| `predecir` | Aplica el modelo al último día y explica el resultado | `data/predicciones.csv`, `data/informe_prediccion.md` |
+| `consultar` | Muestra el precio previsto por estación, municipio, provincia, marca o carburante | (por pantalla) |
+| `metricas` | Métricas descriptivas del día (Proyecto I) | `data/gasolineras_metricas.csv` |
 
-Todos aceptan `--help`. Los logs se escriben por pantalla y en `logs/`.
+Todos son subcomandos de `python -m pipeline_dsia` y aceptan `--help`. Los logs se escriben por pantalla y en `logs/`.
 
 ### Consultar la predicción
 
 ```bash
-uv run python -m pipeline_dsia.consultar --provincia madrid                           # todos los carburantes
-uv run python -m pipeline_dsia.consultar --municipio getafe --carburante gasolina_95  # + las 5 más baratas
-uv run python -m pipeline_dsia.consultar --estacion 4354                              # una estación (columna id)
-uv run python -m pipeline_dsia.consultar --rotulo repsol --provincia valencia --top 10
+uv run python -m pipeline_dsia consultar --provincia madrid                           # todos los carburantes
+uv run python -m pipeline_dsia consultar --municipio getafe --carburante gasolina_95  # + las 5 más baratas
+uv run python -m pipeline_dsia consultar --estacion 4354                              # una estación (columna id)
+uv run python -m pipeline_dsia consultar --rotulo repsol --provincia valencia --top 10
 ```
 
 Los filtros se combinan y no distinguen tildes ni mayúsculas. Lee `data/predicciones.csv`, así
@@ -101,9 +101,9 @@ Copia `.env.example` como `.env` (no se sube a Git):
 ### Métricas descriptivas (Proyecto I)
 
 ```bash
-uv run python -m pipeline_dsia                                 # ejecución con valores por defecto
-uv run python -m pipeline_dsia --top 5 --min-estaciones 30     # cambiar los rankings
-uv run python -m pipeline_dsia --salida otra_ruta.csv          # guardar el CSV en otra ruta
+uv run python -m pipeline_dsia metricas                        # ejecución con valores por defecto
+uv run python -m pipeline_dsia metricas --top 5 --min-estaciones 30   # cambiar los rankings
+uv run python -m pipeline_dsia metricas --salida otra_ruta.csv        # guardar el CSV en otra ruta
 ```
 
 | Opción | Por defecto | Descripción |
@@ -128,9 +128,9 @@ de todas las estaciones válidas, junto con dos series de mercado que influyen e
 | [BCE – EXR](https://data.ecb.europa.eu/data/datasets/EXR/EXR.D.USD.EUR.SP00.A) | EUR/USD de referencia, diario | `data-api.ecb.europa.eu/.../D.USD.EUR.SP00.A` | No |
 
 ```bash
-uv run python -m pipeline_dsia.ingesta                       # precios de hoy + mercados
-uv run python -m pipeline_dsia.ingesta --desde 2026-06-01    # backfill de los días que falten
-uv run python -m pipeline_dsia.ingesta --sin-mercados        # solo precios
+uv run python -m pipeline_dsia ingesta                       # precios de hoy + mercados
+uv run python -m pipeline_dsia ingesta --desde 2026-06-01    # backfill de los días que falten
+uv run python -m pipeline_dsia ingesta --sin-mercados        # solo precios
 ```
 
 ```text
@@ -170,7 +170,7 @@ Resumen; el detalle y la justificación de cada decisión están en [`docs/DEFEN
 - **Persistencia.** `models/modelo.joblib` (joblib) + `models/metricas.json`.
 - **Métricas.** En [`models/INFORME_MODELO.md`](models/INFORME_MODELO.md), que se regenera en
   cada entrenamiento.
-- **Reentrenar.** `uv run python -m pipeline_dsia.entrenar` (con `--sin-busqueda` reutiliza los
+- **Reentrenar.** `uv run python -m pipeline_dsia entrenar` (con `--sin-busqueda` reutiliza los
   hiperparámetros anteriores). En GitHub Actions se reentrena cada lunes.
 
 ## Hugging Face (borde de IA)
@@ -213,7 +213,7 @@ mano (botón *Run workflow*); si la ingesta falla, continúa con el último hist
 
 ## Qué se ampliará en el Proyecto III
 
-- **API** (FastAPI): `/predict` sobre `predecir_manana()` y los filtros de `consultar.py`, y `/analyze` sobre `ClienteIA.explicar()`.
+- **API** (FastAPI): `/predict` sobre `predecir_manana()` y los filtros de `ejecutar_consulta()` (`predecir.py`), y `/analyze` sobre `ClienteIA.explicar()`.
 - **Monitorización**: comparar cada día la predicción de ayer con el precio real y vigilar el error.
 - **Despliegue** de la API y reentrenamiento cuando el error supere un umbral.
 - Nuevas variables: marca (clasificada), régimen fiscal y festivos.
@@ -226,42 +226,30 @@ mano (botón *Run workflow*); si la ingesta falla, continúa con el último hist
 └── pipeline_diario.yml # ingesta → entrenar → predecir, cada día
 parte_a/ejercicio_ventas/ # parte A: pipeline de ventas (ver su README)
 src/pipeline_dsia/
-├── __main__.py     # línea de comandos: orquesta todo el pipeline
-├── loader.py       # descarga con reintentos → DataFrame
-├── constants.py    # URL de la API, columnas numéricas y rangos válidos
-├── contracts.py    # contrato de datos (pydantic) de una estación
-├── validator.py    # normalización de números y validación con el contrato
-├── metrics.py      # métricas
-├── mercados.py     # Brent (FRED) y EUR/USD (BCE)
-├── historico.py    # almacén histórico: un fichero por día
-├── ingesta.py      # CLI de la ingesta diaria y del backfill
-├── features.py     # variables y objetivo del modelo
-├── modelo.py       # modelo sklearn: definición, validación temporal, búsqueda, métricas, joblib
-├── entrenar.py     # CLI de entrenamiento
-├── predecir.py     # CLI de inferencia + explicación
-├── consultar.py    # CLI de consulta de las predicciones
-├── ia.py           # cliente de IA: contratos, mock y Hugging Face
-├── config.py       # variables de entorno (.env)
-├── registro.py     # configuración de los logs
-└── exceptions.py   # excepciones de dominio
+├── __main__.py     # línea de comandos: un subcomando por paso (metricas, ingesta, entrenar, predecir, consultar)
+├── config.py       # constantes (URL, columnas, rangos), excepciones, variables de entorno (.env) y logs
+├── loader.py       # descargas con reintentos: API del Ministerio, Brent (FRED) y EUR/USD (BCE)
+├── validator.py    # contrato de datos (pydantic) de una estación y validación
+├── metrics.py      # métricas descriptivas del día
+├── historico.py    # almacén histórico (un fichero por día), ingesta diaria y backfill
+├── modelo.py       # features, modelo sklearn (validación temporal, búsqueda, métricas, joblib) y entrenamiento
+├── predecir.py     # inferencia + explicación, y consulta de las predicciones
+└── ia.py           # cliente de IA: contratos, mock y Hugging Face
 test/
-├── conftest.py     # estaciones y respuesta de la API inventadas
-├── test_metrics.py
-├── test_cli.py
-├── test_loader.py
+├── conftest.py            # estaciones, respuesta de la API e histórico sintético inventados
+├── test_cli.py            # subcomandos y opciones de la línea de comandos
+├── test_loader.py         # reintentos, métodos de conexión y CSV de mercados
 ├── test_validator.py      # normalización y reglas del contrato
-├── test_integration.py    # integración: API simulada → contrato → métricas → CSV
-├── test_mercados.py
-├── test_historico.py
-├── test_ingesta.py
-├── test_features.py
-├── test_modelo.py          # incluye guardar → cargar → predecir
-├── test_ia.py              # mock y cliente HF simulado
-├── test_consultar.py
-└── test_pipeline_modelo.py # integración: histórico → entrenar → predecir
+├── test_metrics.py
+├── test_historico.py      # histórico, ingesta y backfill
+├── test_modelo.py         # features y modelo: incluye guardar → cargar → predecir
+├── test_predecir.py       # consulta de las predicciones
+├── test_ia.py             # mock y cliente HF simulado
+└── test_integration.py    # integración: métricas de principio a fin e histórico → entrenar → predecir
 models/                     # modelo entrenado, métricas e informe
 historico/                  # datos diarios (los genera la ingesta)
 docs/DEFENSA.md             # explicación detallada de las decisiones
+docs/PIPELINE.md            # diagrama del pipeline (Mermaid) y tabla de etapas
 LICENSE                     # licencia MIT
 ```
 
