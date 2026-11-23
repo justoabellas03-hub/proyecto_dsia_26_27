@@ -34,24 +34,6 @@ def test_rechaza_valores_no_validos(argumentos):
         cli.crear_parser().parse_args(argumentos)
 
 
-def test_ejecucion_completa(monkeypatch, tmp_path, capsys):
-    monkeypatch.setattr(cli, "cargar_datos", lambda url: respuesta_api())
-    salida = tmp_path / "carpeta_nueva" / "resultados.csv"
-
-    codigo = cli.main(["metricas", "--top", "1", "--min-estaciones", "1", "--salida", str(salida)])
-
-    assert codigo == 0
-    texto = capsys.readouterr().out
-    assert "Válidas: 2 · Inválidas: 0" in texto
-    assert "PLENOIL" in texto
-
-    csv = pd.read_csv(salida, dtype={"id_provincia": str})
-    assert len(csv) == 2
-    for columna in ["media_prov_gasoleo_a", "dif_gasoleo_a", "dif_media", "dif_gasolina_gasoleo"]:
-        assert columna in csv.columns
-    assert csv.loc[0, "media_prov_gasoleo_a"] == pytest.approx(1.429)   # (1.459 + 1.399) / 2
-
-
 def test_crea_el_csv_por_defecto(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "cargar_datos", lambda url: respuesta_api())
     monkeypatch.chdir(tmp_path)

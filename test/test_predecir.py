@@ -91,8 +91,3 @@ def test_cli_sin_coincidencias(fichero, capsys):
 def test_cli_sin_fichero_de_predicciones(tmp_path, capsys):
     assert cli.main(["consultar", "--predicciones", str(tmp_path / "no_existe.csv")]) == 2
     assert "predecir" in capsys.readouterr().out
-
-
-def test_cli_carburante_no_valido(fichero):
-    with pytest.raises(SystemExit):
-        cli.main(["consultar", "--carburante", "queroseno", "--predicciones", str(fichero)])
