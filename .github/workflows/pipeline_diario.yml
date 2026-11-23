@@ -32,20 +32,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 180
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Instalar uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Instalar dependencias
         run: uv sync
 
+      # El servidor del Ministerio suele rechazar conexiones desde servidores en la nube
+      # (como los de GitHub). Si la descarga falla, el pipeline sigue con el histórico
+      # que ya hay en el repo y la ejecución queda marcada con un aviso, no como fallida.
       - name: Ingesta
+        id: ingesta
+        continue-on-error: true
         run: |
           if [ -n "${{ github.event.inputs.desde }}" ]; then
             uv run python -m pipeline_dsia.ingesta --desde "${{ github.event.inputs.desde }}"
           fi
           uv run python -m pipeline_dsia.ingesta
+
+      - name: Avisar si la ingesta ha fallado
+        if: steps.ingesta.outcome == 'failure'
+        run: echo "::warning title=Ingesta::No se han podido descargar los datos de hoy (la API del Ministerio no responde desde GitHub). Se predice con el último histórico disponible."
 
       - name: Entrenar (los lunes, a mano o si aún no hay modelo)
         run: |

@@ -17,10 +17,10 @@ jobs:
       run:
         working-directory: parte_a/ejercicio_ventas
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Instalar uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Instalar dependencias
         run: uv sync
@@ -35,10 +35,10 @@ jobs:
     name: Parte B · pipeline_dsia
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Instalar uv
-        uses: astral-sh/setup-uv@v6
+        uses: astral-sh/setup-uv@v7
 
       - name: Instalar dependencias
         run: uv sync
