@@ -202,6 +202,10 @@ artefacto de la ejecución. `.github/workflows/cli.yml` ejecuta los tests en cad
 ## Estructura
 
 ```text
+.github/workflows/
+├── ci.yml              # CI común: tests de la parte A y de la parte B
+└── pipeline_diario.yml # ingesta → entrenar → predecir, cada día
+parte_a/ejercicio_ventas/ # parte A: pipeline de ventas (ver su README)
 src/pipeline_dsia/
 ├── __main__.py     # línea de comandos: orquesta todo el pipeline
 ├── loader.py       # descarga con reintentos → DataFrame
@@ -226,6 +230,8 @@ test/
 ├── test_metrics.py
 ├── test_cli.py
 ├── test_loader.py
+├── test_validator.py      # normalización y reglas del contrato
+├── test_integration.py    # integración: API simulada → contrato → métricas → CSV
 ├── test_mercados.py
 ├── test_historico.py
 ├── test_ingesta.py
@@ -237,6 +243,7 @@ test/
 models/                     # modelo entrenado, métricas e informe
 historico/                  # datos diarios (los genera la ingesta)
 docs/DEFENSA.md             # explicación detallada de las decisiones
+LICENSE                     # licencia MIT
 ```
 
 ## Validación de los datos
@@ -321,7 +328,7 @@ El fichero se guarda en UTF-8 con BOM, para que Excel muestre bien las tildes.
 ```bash
 uv run pytest                                          # todos los tests (sin conexión a internet)
 uv run pytest --cov=pipeline_dsia --cov-report=term-missing
-uv run pytest -m integration                           # solo integración: histórico → entrenar → predecir
+uv run pytest -m integration                           # solo integración (pipeline de métricas y del modelo)
 uv run pytest -m hf_real                               # llamada real a Hugging Face (necesita HF_TOKEN)
 ```
 
@@ -329,6 +336,17 @@ Ningún test necesita conexión a internet (salvo `hf_real`, que se salta si no 
 
 - Las métricas se prueban con 5 estaciones inventadas, con resultados calculados a mano.
 - Las descargas se simulan (`monkeypatch`).
+- El validador se prueba regla a regla del contrato (id, código postal, tipo de venta,
+  coordenadas, rangos de precio, duplicados) en `test_validator.py`.
+- `test_integration.py` ejecuta el pipeline del Proyecto I de principio a fin con una
+  respuesta de la API simulada (válidas, inválidas y repetidas) y comprueba el CSV final.
 - El modelo se prueba con un histórico sintético (`crear_historico_sintetico` en `conftest.py`),
   incluida la carga del modelo guardado y la inferencia.
 - El cliente de IA se prueba con el mock y con un cliente de Hugging Face simulado.
+
+Los tests de las dos partes se ejecutan en GitHub Actions en cada push y pull request
+(`.github/workflows/ci.yml`).
+
+## Licencia
+
+MIT. Ver [`LICENSE`](LICENSE).
