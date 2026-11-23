@@ -4,37 +4,40 @@ Todos los pasos se lanzan con `python -m pipeline_dsia <comando>`.
 
 ```mermaid
 flowchart TD
-    API["API del Ministerio<br/><small>precios diarios por gasolinera</small>"]:::fuente
-    MER_SRC["FRED y BCE<br/><small>Brent y EUR/USD</small>"]:::fuente
+    CLI["__main__.py: una sola línea de comandos<br/><small>metricas · ingesta · entrenar · predecir · consultar</small>"]:::comun
 
-    CARGA["Carga y validación<br/><small>loader.py → contrato pydantic (validator.py)</small>"]:::p1
-    MER["Mercados<br/><small>loader.py</small>"]:::p2
+    API["API del Ministerio<br/><small>precios diarios por gasolinera</small>"]:::comun
+    MER_SRC["FRED y BCE<br/><small>Brent y EUR/USD</small>"]:::comun
 
-    METRICAS["Métricas del día<br/><small>metrics.py → data/gasolineras_metricas.csv</small>"]:::p1
-    HIST["Histórico<br/><small>historico/ · un fichero por día</small>"]:::p2
+    LOADER["loader.py<br/><small>descargas con reintentos (precios y mercados)</small>"]:::comun
+    VAL["validator.py<br/><small>contrato pydantic de cada estación</small>"]:::comun
 
-    FEAT["Features<br/><small>modelo.py · variables y objetivo</small>"]:::p2
-    ENT["Entrenar (los lunes)<br/><small>modelo.py · modelo sklearn → models/modelo.joblib</small>"]:::p2
-    PRED["Predecir<br/><small>predecir.py · precio de mañana</small>"]:::p2
-    IA["Explicación IA<br/><small>ia.py · Hugging Face o mock</small>"]:::p2
-    CONS["Consultar<br/><small>predecir.py</small>"]:::p2
+    METRICAS["metrics.py<br/><small>comando metricas → data/gasolineras_metricas.csv</small>"]:::p1
+    HIST["historico.py<br/><small>comando ingesta · un fichero por día</small>"]:::p2
+    MODELO["modelo.py<br/><small>comando entrenar · features + sklearn → models/</small>"]:::p2
+    PRED["predecir.py<br/><small>comandos predecir y consultar → data/</small>"]:::p2
+    IA["ia.py<br/><small>Hugging Face o mock</small>"]:::p2
 
-    API --> CARGA
-    MER_SRC --> MER
-    CARGA --> METRICAS
-    CARGA --> HIST
-    MER --> HIST
-    HIST --> FEAT --> ENT --> PRED
-    PRED --> IA
-    PRED --> CONS
+    CONFIG["config.py: lo usan todos los módulos<br/><small>constantes, excepciones, variables de entorno y logs</small>"]:::comun
 
-    classDef fuente fill:#F1EFE8,stroke:#5F5E5A,color:#444441
+    CLI ~~~ API
+    CLI ~~~ MER_SRC
+    API --> LOADER
+    MER_SRC --> LOADER
+    LOADER --> VAL
+    LOADER -- mercados --> HIST
+    VAL --> METRICAS
+    VAL --> HIST
+    HIST --> MODELO --> PRED --> IA
+    IA ~~~ CONFIG
+
+    classDef comun fill:#F1EFE8,stroke:#5F5E5A,color:#444441
     classDef p1 fill:#EEEDFE,stroke:#534AB7,color:#3C3489
     classDef p2 fill:#E1F5EE,stroke:#0F6E56,color:#085041
 ```
 
-Morado: Proyecto I (métricas del día, `python -m pipeline_dsia metricas`).
-Verde: Proyecto II (ingesta histórica, modelo, predicción e IA).
+Morado: Proyecto I (métricas del día). Verde: Proyecto II (histórico, modelo, predicción e IA).
+Gris: fuentes y módulos comunes. `config.py` (abajo) lo importan todos los módulos.
 
 ## Etapas
 
