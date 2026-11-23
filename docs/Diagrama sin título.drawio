@@ -1,0 +1,141 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Página-1" id="28-V4b0d4ZNzstSGP1QQ">
+    <mxGraphModel dx="2711" dy="1732" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-3" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="230" />
+              <mxPoint x="230" y="230" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-1" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="*API del Ministerio*:&lt;div&gt;Precios diarios por gasolinera&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="200" x="130" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-5" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-4" value="">
+          <mxGeometry relative="1" x="-0.1111" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="320" />
+              <mxPoint x="200" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-37" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-9" value="">
+          <mxGeometry relative="1" x="-0.3366" as="geometry">
+            <Array as="points">
+              <mxPoint x="374" y="320" />
+              <mxPoint x="374" y="320" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-2" parent="1" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;div&gt;&lt;b&gt;loader.py:&lt;/b&gt;&lt;/div&gt;&lt;div&gt;Contrato pydantic (validator.py)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="390" x="130" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-20" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="gDxrpkDgZn2eu2DKXfyi-18">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-4" parent="1" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="&lt;b&gt;validator.py:&lt;/b&gt;&lt;div&gt;Contrato pydantic de cada estación&lt;/div&gt;" vertex="1">
+          <mxGeometry height="70" width="200" x="105" y="380" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-8" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-2" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="470" y="210" />
+              <mxPoint x="470" y="210" />
+            </Array>
+            <mxPoint x="660" y="230" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-6" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="FRED y BCE:&lt;div&gt;Brent y EUR/USD&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="410" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-27" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-26" value="">
+          <mxGeometry relative="1" x="0.1" as="geometry">
+            <Array as="points">
+              <mxPoint x="375" y="600" />
+              <mxPoint x="375" y="600" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-9" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;histórico.py:&lt;/b&gt;&lt;div&gt;Comando de ingesta · un fichero por día&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="270" x="239" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-16" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="__main__.py: Una sola línea de comandos" vertex="1">
+          <mxGeometry height="60" width="430" x="130" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-18" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;metrics.py&lt;/b&gt;&lt;div&gt;Comando metricas&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="120" x="80" y="500" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-24" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.75;exitY=1;exitDx=0;exitDy=0;entryX=0.087;entryY=-0.027;entryDx=0;entryDy=0;entryPerimeter=0;" target="gDxrpkDgZn2eu2DKXfyi-9">
+          <mxGeometry relative="1" x="0.268" as="geometry">
+            <Array as="points">
+              <mxPoint x="262.5" y="450" />
+            </Array>
+            <mxPoint x="270" y="490" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-31" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-26" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-30" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="375" y="720" />
+              <mxPoint x="375" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-26" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;modelo.py:&lt;/b&gt;&lt;div&gt;Comando entrenar · features + sklearn&amp;nbsp;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="270" x="240" y="620" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-33" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-32" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="285" y="810" />
+              <mxPoint x="285" y="810" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-36" edge="1" parent="1" source="gDxrpkDgZn2eu2DKXfyi-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" target="gDxrpkDgZn2eu2DKXfyi-35" value="">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="449" y="820" />
+              <mxPoint x="449" y="820" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-30" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;predecir.py&lt;/b&gt;&lt;div&gt;Comando predecir y consultar&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="270" x="240" y="740" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-32" parent="1" style="whiteSpace=wrap;html=1;rounded=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;ia.py&lt;/b&gt;&lt;div&gt;Hugging face o mock&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="154" x="210" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-35" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="Salidas&lt;div&gt;data/· models/· logs/&lt;/div&gt;" vertex="1">
+          <mxGeometry height="60" width="131" x="389" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-39" parent="1" style="whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="80" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-41" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Proyecto I: Métricas del día" vertex="1">
+          <mxGeometry height="30" width="175" x="105" y="995" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-42" parent="1" style="whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="305" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-43" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Proyecto II: Histórico y modelo" vertex="1">
+          <mxGeometry height="30" width="175" x="335" y="995" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-44" parent="1" style="whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" value="" vertex="1">
+          <mxGeometry height="20" width="20" x="530" y="1000" as="geometry" />
+        </mxCell>
+        <mxCell id="gDxrpkDgZn2eu2DKXfyi-46" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Fuentes y comunes" vertex="1">
+          <mxGeometry height="30" width="175" x="530" y="995" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
