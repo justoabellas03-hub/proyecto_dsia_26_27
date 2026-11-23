@@ -188,9 +188,28 @@ falla, el pipeline sigue con el mock.
 
 ## Automatización
 
-`.github/workflows/pipeline_diario.yml` ejecuta cada día ingesta → (los lunes, entrenar) →
-predecir, guarda `historico/` y `models/` en el repositorio y publica la predicción como
-artefacto de la ejecución. `.github/workflows/cli.yml` ejecuta los tests en cada push.
+**Ejecución diaria (local).** La API del Ministerio rechaza las conexiones desde servidores en
+la nube, incluidos los de GitHub Actions (el paso de ingesta terminaba con código 2). Por eso el
+pipeline diario se ejecuta en local con el Programador de tareas de Windows:
+`scripts/pipeline_local.ps1` hace ingesta → (los lunes, entrenar) → predecir, guarda `historico/`
+y `models/` con un commit y hace push. El registro queda en `logs/pipeline_local.log`.
+
+Para registrar la tarea (PowerShell, una sola vez):
+
+```powershell
+$script = "$PWD\scripts\pipeline_local.ps1"
+$accion = New-ScheduledTaskAction -Execute "powershell.exe" -Argument "-NoProfile -ExecutionPolicy Bypass -File `"$script`""
+$cuando = New-ScheduledTaskTrigger -Daily -At 9:00
+$ajustes = New-ScheduledTaskSettingsSet -StartWhenAvailable
+Register-ScheduledTask -TaskName "Pipeline DSIA" -Action $accion -Trigger $cuando -Settings $ajustes
+```
+
+`-StartWhenAvailable` hace que, si el ordenador estaba apagado a esa hora, la tarea se lance en
+cuanto se encienda.
+
+**GitHub Actions.** `.github/workflows/pipeline_diario.yml` hace lo mismo, pero solo se lanza a
+mano (botón *Run workflow*); si la ingesta falla, continúa con el último histórico y deja un aviso.
+`.github/workflows/ci.yml` ejecuta los tests de las partes A y B en cada push y pull request.
 
 ## Qué se ampliará en el Proyecto III
 
