@@ -1,10 +1,10 @@
-"""Tests de la consulta de predicciones."""
+"""Tests de la consulta de predicciones (la predicción completa está en test_integration.py)."""
 
 import pandas as pd
 import pytest
 
-import pipeline_dsia.consultar as consultar
-
+import pipeline_dsia.__main__ as cli
+import pipeline_dsia.predecir as predecir
 
 @pytest.fixture
 def predicciones() -> pd.DataFrame:
@@ -29,35 +29,35 @@ def fichero(predicciones, tmp_path):
 
 
 def test_normalizar_quita_tildes_y_mayusculas():
-    assert consultar.normalizar(" córdoba ") == "CORDOBA"
-    assert consultar.normalizar("Coruña (A)") == "CORUNA (A)"
+    assert predecir.normalizar(" córdoba ") == "CORDOBA"
+    assert predecir.normalizar("Coruña (A)") == "CORUNA (A)"
 
 
 def test_filtrar_por_provincia_sin_tildes(predicciones):
-    filas = consultar.filtrar(predicciones, provincia="cordoba")
+    filas = predecir.filtrar(predicciones, provincia="cordoba")
     assert filas["id"].tolist() == ["1", "1", "2"]
 
 
 def test_filtrar_por_parte_del_nombre(predicciones):
-    assert consultar.filtrar(predicciones, provincia="coruña")["id"].tolist() == ["3"]
+    assert predecir.filtrar(predicciones, provincia="coruña")["id"].tolist() == ["3"]
 
 
 def test_filtros_combinados(predicciones):
-    filas = consultar.filtrar(predicciones, provincia="córdoba", carburante="gasoleo_a", rotulo="repsol")
+    filas = predecir.filtrar(predicciones, provincia="córdoba", carburante="gasoleo_a", rotulo="repsol")
     assert filas["id"].tolist() == ["1"]
 
 
 def test_filtrar_por_estacion_es_exacto(predicciones):
-    assert len(consultar.filtrar(predicciones, estacion="1")) == 2          # no incluye la 10, 11...
-    assert consultar.filtrar(predicciones, estacion="99").empty
+    assert len(predecir.filtrar(predicciones, estacion="1")) == 2          # no incluye la 10, 11...
+    assert predecir.filtrar(predicciones, estacion="99").empty
 
 
 def test_rotulo_vacio_no_rompe_el_filtro(predicciones):
-    assert consultar.filtrar(predicciones, rotulo="cepsa")["id"].tolist() == ["4"]
+    assert predecir.filtrar(predicciones, rotulo="cepsa")["id"].tolist() == ["4"]
 
 
 def test_resumen_por_carburante(predicciones):
-    resumen = consultar.resumen_por_carburante(consultar.filtrar(predicciones, provincia="cordoba"))
+    resumen = predecir.resumen_por_carburante(predecir.filtrar(predicciones, provincia="cordoba"))
     gasoleo = resumen.set_index("carburante").loc["gasoleo_a"]
     assert gasoleo["estaciones"] == 2
     assert gasoleo["precio_medio_hoy"] == pytest.approx(1.45)
@@ -66,12 +66,12 @@ def test_resumen_por_carburante(predicciones):
 
 
 def test_mas_baratas_previstas(predicciones):
-    filas = consultar.filtrar(predicciones, carburante="gasoleo_a")
-    assert consultar.mas_baratas_previstas(filas, 2)["id"].tolist() == ["2", "3"]
+    filas = predecir.filtrar(predicciones, carburante="gasoleo_a")
+    assert predecir.mas_baratas_previstas(filas, 2)["id"].tolist() == ["2", "3"]
 
 
 def test_cli_provincia_y_carburante(fichero, capsys):
-    codigo = consultar.main(["--provincia", "cordoba", "--carburante", "gasoleo_a", "--predicciones", str(fichero)])
+    codigo = cli.main(["consultar", "--provincia", "cordoba", "--carburante", "gasoleo_a", "--predicciones", str(fichero)])
     salida = capsys.readouterr().out
     assert codigo == 0
     assert "2026-11-13" in salida and "2 estaciones" in salida
@@ -79,20 +79,20 @@ def test_cli_provincia_y_carburante(fichero, capsys):
 
 
 def test_cli_estacion(fichero, capsys):
-    assert consultar.main(["--estacion", "1", "--predicciones", str(fichero)]) == 0
+    assert cli.main(["consultar", "--estacion", "1", "--predicciones", str(fichero)]) == 0
     salida = capsys.readouterr().out
     assert "gasolina_95" in salida and "1.595" in salida
 
 
 def test_cli_sin_coincidencias(fichero, capsys):
-    assert consultar.main(["--provincia", "atlantida", "--predicciones", str(fichero)]) == 1
+    assert cli.main(["consultar", "--provincia", "atlantida", "--predicciones", str(fichero)]) == 1
 
 
 def test_cli_sin_fichero_de_predicciones(tmp_path, capsys):
-    assert consultar.main(["--predicciones", str(tmp_path / "no_existe.csv")]) == 2
+    assert cli.main(["consultar", "--predicciones", str(tmp_path / "no_existe.csv")]) == 2
     assert "predecir" in capsys.readouterr().out
 
 
 def test_cli_carburante_no_valido(fichero):
     with pytest.raises(SystemExit):
-        consultar.main(["--carburante", "queroseno", "--predicciones", str(fichero)])
+        cli.main(["consultar", "--carburante", "queroseno", "--predicciones", str(fichero)])

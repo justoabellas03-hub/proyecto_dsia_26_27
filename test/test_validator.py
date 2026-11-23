@@ -3,11 +3,8 @@
 import pandas as pd
 import pytest
 
-from pipeline_dsia.constants import CAMPOS_PRECIOS, COORDENADAS
-from pipeline_dsia.contracts import CAMPOS_PRECIO
-from pipeline_dsia.exceptions import ValidationError
-from pipeline_dsia.validator import normalizar_numeros, validar_estaciones
-
+from pipeline_dsia.config import CAMPOS_PRECIOS, COORDENADAS, ValidationError
+from pipeline_dsia.validator import CAMPOS_PRECIO, normalizar_numeros, validar_estaciones
 
 def validar(df: pd.DataFrame) -> tuple[pd.DataFrame, int]:
     """Lo mismo que hace el pipeline: primero normalizar, luego validar."""

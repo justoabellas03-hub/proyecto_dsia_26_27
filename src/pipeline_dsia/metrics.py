@@ -1,7 +1,8 @@
+"""Métricas descriptivas del día sobre las estaciones válidas (Proyecto I)."""
+
 import pandas as pd
 
-from pipeline_dsia.contracts import CAMPOS_PRECIO
-
+from pipeline_dsia.validator import CAMPOS_PRECIO
 
 # --- Funciones base ----------------------------------------------------------
 
@@ -132,7 +133,6 @@ def precio_medio_por_marca(df: pd.DataFrame, min_estaciones: int = 20) -> pd.Dat
     tabla = tabla.drop_duplicates("rotulo")
     tabla = tabla[tabla["num_estaciones"] >= min_estaciones]
     return tabla.sort_values("dif_media").round(3).reset_index(drop=True)
-
 
 
 def diferencia_gasolina_gasoleo(df: pd.DataFrame) -> pd.DataFrame:

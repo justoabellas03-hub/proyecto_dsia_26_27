@@ -49,9 +49,9 @@ jobs:
         continue-on-error: true
         run: |
           if [ -n "${{ github.event.inputs.desde }}" ]; then
-            uv run python -m pipeline_dsia.ingesta --desde "${{ github.event.inputs.desde }}"
+            uv run python -m pipeline_dsia ingesta --desde "${{ github.event.inputs.desde }}"
           fi
-          uv run python -m pipeline_dsia.ingesta
+          uv run python -m pipeline_dsia ingesta
 
       - name: Avisar si la ingesta ha fallado
         if: steps.ingesta.outcome == 'failure'
@@ -60,13 +60,13 @@ jobs:
       - name: Entrenar (los lunes, a mano o si aún no hay modelo)
         run: |
           if [ "$(date -u +%u)" = "1" ] || [ "${{ github.event.inputs.reentrenar }}" = "true" ] || [ ! -f models/modelo.joblib ]; then
-            uv run python -m pipeline_dsia.entrenar
+            uv run python -m pipeline_dsia entrenar
           else
             echo "Hoy no toca reentrenar"
           fi
 
       - name: Predecir mañana
-        run: uv run python -m pipeline_dsia.predecir
+        run: uv run python -m pipeline_dsia predecir
 
       - name: Publicar la predicción como artefacto
         uses: actions/upload-artifact@v4

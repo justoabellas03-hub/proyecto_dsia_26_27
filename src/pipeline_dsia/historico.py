@@ -8,18 +8,20 @@ historico/
 
 Un fichero por día hace que la ingesta sea idempotente (repetir un día lo
 sobrescribe, no lo duplica) y que el backfill pueda saltarse los días que ya existen.
+
+Ingesta diaria (ejecutar_ingesta): precios de las gasolineras + Brent + EUR/USD → historico/.
 """
 
 import logging
-from datetime import date
+import time
+from datetime import date, timedelta
 from pathlib import Path
 
 import pandas as pd
 
-from pipeline_dsia.constants import COLUMNAS
-from pipeline_dsia.contracts import CAMPOS_PRECIO
-from pipeline_dsia.exceptions import DataLoadError
-from pipeline_dsia.validator import normalizar_numeros, validar_estaciones
+from pipeline_dsia.config import COLUMNAS, URL_API, URL_API_HIST, DataLoadError, ValidationError, configurar_logs
+from pipeline_dsia.loader import cargar_datos, descargar_mercados
+from pipeline_dsia.validator import CAMPOS_PRECIO, normalizar_numeros, validar_estaciones
 
 log = logging.getLogger(__name__)
 
@@ -103,3 +105,92 @@ def cargar_mercados(carpeta: Path = CARPETA_HISTORICO) -> pd.DataFrame:
     if not ruta.exists():
         raise DataLoadError(f"No existe {ruta}: ejecuta antes la ingesta")
     return pd.read_csv(ruta, parse_dates=["fecha"])
+
+
+# ======================================================================================
+# Ingesta diaria y backfill
+# ======================================================================================
+
+PAUSA_BACKFILL = 2.0   # segundos entre días, para no saturar el servicio del Ministerio
+MAX_FALLOS_SEGUIDOS = 3 # días seguidos fallidos a partir de los cuales el backfill se detiene
+
+
+def url_dia(dia: date) -> str:
+    """El endpoint histórico espera la fecha como dd-mm-aaaa."""
+    return f"{URL_API_HIST}{dia:%d-%m-%Y}"
+
+
+def ingerir_dia(url: str, dia: date, carpeta: Path) -> None:
+    df_validas, num_invalidas = preparar_estaciones(cargar_datos(url))
+    log.info("%s · válidas: %d · inválidas: %d", dia, len(df_validas), num_invalidas)
+    guardar_dia(df_validas, dia, carpeta)
+
+
+def backfill(desde: date, hasta: date, carpeta: Path, pausa: float = PAUSA_BACKFILL) -> tuple[int, int]:
+    """Descarga los días de [desde, hasta] que no estén ya guardados.
+
+    Un día que falla no detiene el resto: se registra y se sigue. Pero si fallan
+    varios días seguidos, el servicio no responde y no tiene sentido insistir:
+    se detiene (al repetir el comando se retoma donde se quedó).
+    Devuelve (días guardados, días fallidos).
+    """
+    ya = dias_guardados(carpeta)
+    pendientes = [desde + timedelta(d) for d in range((hasta - desde).days + 1)]
+    pendientes = [d for d in pendientes if d not in ya]
+    log.info("Backfill %s → %s: %d días pendientes", desde, hasta, len(pendientes))
+
+    ok = fallidos = seguidos = 0
+    for dia in pendientes:
+        try:
+            ingerir_dia(url_dia(dia), dia, carpeta)
+            ok += 1
+            seguidos = 0
+        except (DataLoadError, ValidationError) as exc:
+            log.error("%s · fallido: %s", dia, exc)
+            fallidos += 1
+            seguidos += 1
+            if seguidos >= MAX_FALLOS_SEGUIDOS:
+                log.error("%d días seguidos fallidos: el servicio no responde. Se detiene el backfill "
+                          "(quedan %d días sin intentar)", seguidos, len(pendientes) - ok - fallidos)
+                break
+        time.sleep(pausa)
+    return ok, fallidos
+
+
+def ejecutar_ingesta(desde: date | None = None, carpeta: Path = CARPETA_HISTORICO,
+                     sin_mercados: bool = False) -> int:
+    """Precios del día (o backfill desde `desde` hasta ayer) y datos de mercado → histórico.
+
+    Códigos de salida: 0 correcto · 1 ninguna estación válida · 2 error al descargar.
+    """
+    configurar_logs("ingesta")
+    hoy = date.today()
+
+    # 1. Precios de las gasolineras
+    if desde:
+        if desde >= hoy:
+            log.error("--desde debe ser anterior a hoy")
+            return 2
+        ok, fallidos = backfill(desde, hoy - timedelta(days=1), carpeta)
+        log.info("Backfill terminado: %d días guardados, %d fallidos", ok, fallidos)
+        if fallidos and not ok:
+            return 2
+    else:
+        try:
+            ingerir_dia(URL_API, hoy, carpeta)
+        except DataLoadError as exc:
+            log.error("Error al cargar los precios: %s", exc)
+            return 2
+        except ValidationError as exc:
+            log.error("Validación fallida: %s", exc)
+            return 1
+
+    # 2. Mercados: FRED y BCE devuelven toda la serie, así que se reescribe entera
+    if not sin_mercados:
+        try:
+            guardar_mercados(descargar_mercados(), carpeta)
+        except DataLoadError as exc:
+            log.error("Error al descargar los mercados: %s", exc)
+            return 2
+
+    return 0

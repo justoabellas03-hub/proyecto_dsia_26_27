@@ -7,13 +7,11 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError as PydanticValidationError
 
-from pipeline_dsia.config import Configuracion, cargar_env, leer_configuracion
-from pipeline_dsia.exceptions import IAError
+from pipeline_dsia.config import Configuracion, IAError, cargar_env, leer_configuracion
 from pipeline_dsia.ia import (
     ClienteHF, ClienteMock, Explicacion, ResumenCarburante, ResumenPrediccion, crear_cliente,
     explicar_con_respaldo, resumen_a_texto,
 )
-
 
 @pytest.fixture
 def resumen() -> ResumenPrediccion:

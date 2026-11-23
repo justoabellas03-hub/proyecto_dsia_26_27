@@ -18,8 +18,7 @@ from typing import Literal, Protocol
 
 from pydantic import BaseModel, Field
 
-from pipeline_dsia.config import Configuracion
-from pipeline_dsia.exceptions import IAError
+from pipeline_dsia.config import Configuracion, IAError
 
 log = logging.getLogger(__name__)
 

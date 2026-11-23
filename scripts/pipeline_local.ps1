@@ -1,4 +1,4 @@
-﻿# Pipeline diario en local: ingesta -> (los lunes) entrenar -> predecir -> commit y push.
+﻿﻿# Pipeline diario en local: ingesta -> (los lunes) entrenar -> predecir -> commit y push.
 #
 # Se ejecuta con el Programador de tareas de Windows (ver README, sección Automatización).
 # Corre en local porque la API del Ministerio rechaza las conexiones desde GitHub Actions.
@@ -18,21 +18,21 @@ if (-not $uv) { $uv = Join-Path $env:USERPROFILE ".local\bin\uv.exe" }
 Write-Output "=== Pipeline local $(Get-Date -Format 'yyyy-MM-dd HH:mm') ==="
 
 # 1. Traer lo último de GitHub (por si se ha subido algo desde otro sitio)
-git pull --rebase --autostash
+git pull --no-rebase --autostash
 
 # 2. Ingesta: si falla, seguimos con el histórico que haya
-& $uv run python -m pipeline_dsia.ingesta
+& $uv run python -m pipeline_dsia ingesta
 if ($LASTEXITCODE -ne 0) { Write-Warning "Ingesta fallida (código $LASTEXITCODE): se usa el último histórico" }
 
 # 3. Entrenar los lunes o si todavía no hay modelo
 if ((Get-Date).DayOfWeek -eq "Monday" -or -not (Test-Path "models\modelo.joblib")) {
-    & $uv run python -m pipeline_dsia.entrenar
+    & $uv run python -m pipeline_dsia entrenar
 } else {
     Write-Output "Hoy no toca reentrenar"
 }
 
 # 4. Predecir mañana
-& $uv run python -m pipeline_dsia.predecir
+& $uv run python -m pipeline_dsia predecir
 
 # 5. Guardar el histórico y el modelo en el repositorio
 git add historico/ models/

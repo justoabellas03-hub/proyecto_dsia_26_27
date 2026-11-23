@@ -4,8 +4,7 @@ import pandas as pd
 import pytest
 
 import pipeline_dsia.__main__ as cli
-from pipeline_dsia.exceptions import DataLoadError
-
+from pipeline_dsia.config import DataLoadError
 
 def respuesta_api() -> pd.DataFrame:
     """Dos estaciones con el formato real de la API: texto y coma decimal."""
@@ -23,13 +22,13 @@ def respuesta_api() -> pd.DataFrame:
 
 
 def test_valores_por_defecto():
-    args = cli.crear_parser().parse_args([])
+    args = cli.crear_parser().parse_args(["metricas"])
     assert args.top == 10
     assert args.min_estaciones == 20
     assert args.salida == "data/gasolineras_metricas.csv"
 
 
-@pytest.mark.parametrize("argumentos", [["--top", "0"], ["--top", "diez"], ["--min-estaciones", "-1"]])
+@pytest.mark.parametrize("argumentos", [["metricas", "--top", "0"], ["metricas", "--top", "diez"], ["metricas", "--min-estaciones", "-1"]])
 def test_rechaza_valores_no_validos(argumentos):
     with pytest.raises(SystemExit):
         cli.crear_parser().parse_args(argumentos)
@@ -39,7 +38,7 @@ def test_ejecucion_completa(monkeypatch, tmp_path, capsys):
     monkeypatch.setattr(cli, "cargar_datos", lambda url: respuesta_api())
     salida = tmp_path / "carpeta_nueva" / "resultados.csv"
 
-    codigo = cli.main(["--top", "1", "--min-estaciones", "1", "--salida", str(salida)])
+    codigo = cli.main(["metricas", "--top", "1", "--min-estaciones", "1", "--salida", str(salida)])
 
     assert codigo == 0
     texto = capsys.readouterr().out
@@ -57,7 +56,7 @@ def test_crea_el_csv_por_defecto(monkeypatch, tmp_path):
     monkeypatch.setattr(cli, "cargar_datos", lambda url: respuesta_api())
     monkeypatch.chdir(tmp_path)
 
-    assert cli.main([]) == 0
+    assert cli.main(["metricas"]) == 0
     assert (tmp_path / "data" / "gasolineras_metricas.csv").exists()
 
 
@@ -66,5 +65,17 @@ def test_error_de_carga(monkeypatch, capsys):
         raise DataLoadError("sin conexión")
 
     monkeypatch.setattr(cli, "cargar_datos", falla)
-    assert cli.main([]) == 2
+    assert cli.main(["metricas"]) == 2
     assert "sin conexión" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("argumentos", [
+    [],                                                     # falta el comando
+    ["desconocido"],
+    ["ingesta", "--desde", "12/11/2026"],                   # fecha con formato no válido
+    ["entrenar", "--fraccion-test", "1.5"],
+    ["consultar", "--carburante", "queroseno"],
+])
+def test_comandos_no_validos(argumentos):
+    with pytest.raises(SystemExit):
+        cli.crear_parser().parse_args(argumentos)
